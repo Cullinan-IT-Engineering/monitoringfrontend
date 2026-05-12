@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../services/auth.service';
@@ -154,8 +155,13 @@ export class LoginComponent {
         this.toast.success('Login successful');
         this.router.navigateByUrl('/dashboard');
       },
-      error: () => {
-        this.toast.error('Invalid credentials');
+      error: (e: HttpErrorResponse) => {
+        const msg = e?.error?.error;
+        if (e.status === 403 && typeof msg === 'string') {
+          this.toast.error(msg);
+          return;
+        }
+        this.toast.error(typeof msg === 'string' ? msg : 'Invalid credentials');
       },
     });
   }

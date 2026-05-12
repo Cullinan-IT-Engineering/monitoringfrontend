@@ -1,6 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -18,9 +20,24 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 
       <nav class="nav-links">
         <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
-        <a routerLink="/users" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Users</a>
+        <a
+          *ngIf="showUsersNav"
+          routerLink="/users"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+        Users
+        </a>
         <a routerLink="/ip-management" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">IP Management</a>
         <a routerLink="/logs" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Logs</a>
+        <a
+          *ngIf="showUsersNav"
+          routerLink="/settings"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+        Settings
+        </a>
       </nav>
 
     </aside>
@@ -124,6 +141,19 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
     `,
   ],
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
   @Input() theme: 'dark' | 'light' = 'dark';
+
+  constructor(
+    private readonly auth: AuthService,
+    private readonly cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    this.auth.ensureRoleLoaded().subscribe(() => this.cdr.detectChanges());
+  }
+
+  get showUsersNav(): boolean {
+    return this.auth.isAdmin();
+  }
 }

@@ -8,12 +8,6 @@ export class DashboardService {
 
   constructor(private readonly http: HttpClient) {}
 
-  ingestCsv(file: File) {
-    const fd = new FormData();
-    fd.append('file', file);
-    return this.http.post<{ imported: number; blocked: number }>(`${this.api}/ingest-csv`, fd);
-  }
-
   evaluateLiveRequest(payload: {
     timestamp?: string;
     ip: string;
@@ -115,7 +109,7 @@ export class DashboardService {
   }
 
   getProfile() {
-    return this.http.get<{ full_name: string; email: string }>(`${this.api}/auth/profile`);
+    return this.http.get<{ full_name: string; email: string; role?: string }>(`${this.api}/auth/profile`);
   }
 
   updateProfile(payload: { full_name: string; email: string; password?: string }) {
@@ -142,5 +136,15 @@ export class DashboardService {
 
   usersSetDisabled(userId: number, is_disabled: boolean) {
     return this.http.patch<{ message: string }>(`${this.api}/auth/users/${userId}/disable`, { is_disabled });
+  }
+
+  getAlertEmails() {
+    return this.http.get<{ alert_emails: string[] }>(`${this.api}/settings/alert-emails`);
+  }
+
+  updateAlertEmails(alert_emails: string[]) {
+    return this.http.put<{ message: string; alert_emails: string[] }>(`${this.api}/settings/alert-emails`, {
+      alert_emails,
+    });
   }
 }
